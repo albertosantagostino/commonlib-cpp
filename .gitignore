@@ -1,0 +1,3 @@
+# Ignore build files but consider CMakeLists
+build/**
+!build/CMakeLists**

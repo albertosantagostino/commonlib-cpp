@@ -1,0 +1,38 @@
+Language: Cpp
+BasedOnStyle: Google
+AccessModifierOffset: -2
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyRecord: false
+BreakBeforeBraces: Custom
+ColumnLimit: 120
+CompactNamespaces: true
+DerivePointerAlignment: false
+IncludeCategories:
+  - Regex: '^(<|")(assert|complex|errno|fenv|float|inttypes|limits|locale|math|signal|stdalign|stdargh|stdatomic|stdbool|stddef|stdint|stdio|stdlib|stdnoreturn|string|tgmath|threads|time|uchar|wchar|wctype)\.h'
+    Priority: 1
+  - Regex: '^(<|")(cstdlib|bitset|functional|utility|ctime|chrono|tuple|any|charconv|optional|variant|new|memory|climits|cfloat|cstdint|limits|exception|stdexcept|cassert|system_error|cerrno|cctype|cstring|string|string_view|array|vector|deque|list|forward_list|set|map|unordered_set|unordered_map|stack|queue|algorithm|execution|iterator|cmath|complex|random|numeric|ratio|ios|istream|ostream|iostream|fstream|sstream|strstream|streambuf|cstdio|locale|clocale|regex|thread|mutex|shared_mutex|filesystem|ccomplex|cstdalign|cstdbool)(>|")$'
+    Priority: 2
+  - Regex: '^<.*\.(h)>'
+    Priority: 3
+  - Regex: '^".*"'
+    Priority: 4
+IndentWidth: 4
+NamespaceIndentation: None
+...
