@@ -1,11 +1,11 @@
-/// @file matrix_test.cpp
+/// @file data_structures_matrix_test.cpp
 /// @test commonlib::Matrix
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include <data_structures/commonlib_matrix.h>
+#include <data_structures/matrix.h>
 #include <gtest/gtest.h>
 
 using namespace testing;
@@ -75,6 +75,8 @@ TEST_F(IntMatrixTests, FileLoadingTest)
     fp.close();
     fp_flat.close();
 }
+
+// TODO TEST_F(IntMatrixTests, ExceptionsTest)
 
 template <class T>
 struct TypeTests : public ::testing::Test

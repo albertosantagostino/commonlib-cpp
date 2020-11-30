@@ -1,19 +1,30 @@
-# `commonlib`
+# commonlib
 
-A personal collection of data structures, algorithms and useful classes/functions/snippets written in modern C++
+A header-only library to collect personal implementations of algorithms, data structures, primitives and multiple useful classes/functions/snippets written in modern C++
 
-### Data structures
+## Library
 
-| File                                                   | Class  | Description                |
-| ------------------------------------------------------ | ------ | -------------------------- |
-| `include/commonlib/data_structures/commonlib_matrix.h` | Matrix | Generic 2D matrix template |
+#### Data structures
 
-### Unit testing
+| File                                                         | Class    | Base/Derived | Description                |
+| ------------------------------------------------------------ | -------- | ------------ | -------------------------- |
+| [include/data_structures/matrix.h](include/data_structures/matrix.h) | `Matrix` | B            | Generic 2D matrix template |
+| [include/data_structures/grid.h](include/data_structures/grid.h) | `Grid`   | D(Matrix)    | Generic 2D characters grid |
 
-Tests are written in C++ and based on Google Test. To build and run them:
+#### Primitives
+
+| File                                                     | Class   | Base/Derived | Description                            |
+| -------------------------------------------------------- | ------- | ------------ | -------------------------------------- |
+| [include/primitives/actor.h](include/primitives/actor.h) | `Actor` | B            | Generic actor to be placed on a `Grid` |
+
+### Unit testing and debugging
+
+Tests are written in C++ and are based on the Google Test framework. To build and run them:
 
 ```bash
 cd build
 cmake . && make
 ./commonlib_tests
 ```
+
+To interactively debug any (covered) part of the library, just place a breakpoint in Visual Studio Code and press `F5`.

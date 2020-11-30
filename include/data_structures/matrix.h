@@ -1,9 +1,8 @@
 /// @file matrix.h
-/// @brief Generic 2D matrix template class
 /// @author Alberto Santagostino
 
-#ifndef DATA_STRUCTURES_H
-#define DATA_STRUCTURES_H
+#ifndef DATA_STRUCTURES_MATRIX_H
+#define DATA_STRUCTURES_MATRIX_H
 
 #include <charconv>
 #include <fstream>
@@ -26,7 +25,7 @@ class Matrix
     Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t n_cols);
     Matrix(std::ifstream& fp);
 
-    // Setters
+    // Setters / Inserters
     void InsertRow(const std::size_t index, const std::vector<T> new_row = {});
     void InsertColumn(const std::size_t index, const std::vector<T> new_col = {});
     void RemoveRow(const std::size_t index);     // TODO
@@ -48,7 +47,7 @@ class Matrix
     // Utils / Properties
     void Print(char row_sep = '\n', char col_sep = ' ');
     inline bool IsSquare() { return (NRows() == NCols()); }
-    bool IsNumeric(); // TODO
+    bool IsNumeric();  // TODO
 
     // Operators
     T& operator()(std::size_t row, std::size_t col);
@@ -56,7 +55,7 @@ class Matrix
     inline bool operator==(T const& other) { return m_data == other.m_data; }
     inline bool operator!=(T const& other) { return m_data != other.m_data; }
 
-  private:
+  protected:
     std::vector<std::vector<T>> m_data;
     std::size_t m_rows;
     std::size_t m_cols;
@@ -142,7 +141,7 @@ Matrix<T>::Matrix(std::ifstream& fp)
 {
     if (!fp.is_open())
     {
-        throw std::ios_base::failure("Matrix<T>::Matrix(std::ifstream& fp): File not found");  // TODO
+        throw std::ios_base::failure("Matrix<T>::Matrix(std::ifstream& fp): File not found");
     }
 
     std::string line;
@@ -259,4 +258,4 @@ bool operator!=(const Matrix<T>& lhs, const Matrix<T>& rhs)
 
 }  // namespace commonlib
 
-#endif  // DATA_STRUCTURES_H
+#endif  // DATA_STRUCTURES_MATRIX_H
