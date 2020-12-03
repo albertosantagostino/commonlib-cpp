@@ -19,20 +19,44 @@ class GridTests : public ::testing::Test
     virtual void TearDown() { delete grid; }
 };
 
+TEST_F(GridTests, FileLoadingTest)
+{
+    std::ifstream fp;
+    fp.open("data/input_grid.txt", std::ifstream::in);
+    Grid gridfp(fp, '\0');
+    ASSERT_TRUE(gridfp == *grid);
+    fp.close();
+}
+
 TEST_F(GridTests, TilesTest)
 {
-    grid->AddTileType(TileType::kEmpty, '.');
-    grid->AddTileType(TileType::kWall, 'x');
+    grid->AddTileTypeDefinition(TileType::kTileType_Empty, '.');
+    grid->AddTileTypeDefinition(TileType::kTileType_Wall, 'x');
     auto tile_00 = grid->GetTileType(0, 0);
     auto tile_10 = grid->GetTileType(1, 0);
 
-    EXPECT_EQ(tile_00, TileType::kEmpty);
-    EXPECT_EQ(tile_10, TileType::kWall);
+    EXPECT_EQ(tile_00, TileType::kTileType_Empty);
+    EXPECT_EQ(tile_10, TileType::kTileType_Wall);
 
-    bool res = grid->AddTileType(TileType::kUndefined, '!');
+    bool res = grid->AddTileTypeDefinition(TileType::kTileType_Undefined, '!');
     EXPECT_FALSE(res);
-    res = grid->AddTileType(TileType::kEmpty, 'x');
+    res = grid->AddTileTypeDefinition(TileType::kTileType_Empty, 'x');
     EXPECT_FALSE(res);
+}
+
+TEST_F(GridTests, InfiniteTest)
+{
+    grid->MakeInfinite(true);
+    EXPECT_EQ(grid->operator()(10, 10), 'x');
+    grid->MakeInfinite(false);
+    try
+    {
+        char tile = grid->operator()(10, 10);
+    }
+    catch (const std::exception& e)
+    {
+        EXPECT_EQ(e.what(), std::string("Matrix<T>::operator(): Index is out of range"));
+    }
 }
 
 TEST_F(GridTests, ActorsTest)

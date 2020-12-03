@@ -4,7 +4,11 @@
 #ifndef PRIMITIVES_ACTOR_H
 #define PRIMITIVES_ACTOR_H
 
+#ifdef TEST_BUILD
+#include <primitives/position.h>
+#else
 #include <commonlib/include/primitives/position.h>
+#endif
 
 namespace commonlib
 {
@@ -13,15 +17,19 @@ namespace commonlib
 class Actor
 {
   public:
+    // Constructors
     Actor();
     Actor(const std::size_t id);
     Actor(const std::size_t id, unsigned char character);
 
-    inline const unsigned char GetCharacter() { return m_character; }
+    // Setters
     inline void SetCharacter(char character) { m_character = character; }
 
+    // Getters
+    inline const unsigned char GetCharacter() { return m_character; }
     inline const std::size_t Id() { return m_id; }
 
+    // Operators
     Actor& operator=(const Actor& other);
 
   private:

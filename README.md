@@ -1,6 +1,6 @@
 # commonlib
 
-A header-only library to collect personal implementations of algorithms, data structures, primitives and multiple useful classes/functions/snippets written in modern C++
+Header-only library to collect personal implementations of algorithms, data structures, primitives and multiple useful classes/functions/snippets written in modern C++
 
 ## Library
 

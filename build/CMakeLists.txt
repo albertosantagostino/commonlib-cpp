@@ -22,4 +22,4 @@ include_directories(../include/)
 add_executable(${TEST_TARGET} ${TESTS})
 target_link_libraries(${TEST_TARGET} gtest_main)
 gtest_discover_tests(${TEST_TARGET} WORKING_DIRECTORY ../test TEST_PREFIX *_tests:)
-
+add_definitions(-DTEST_BUILD=True)

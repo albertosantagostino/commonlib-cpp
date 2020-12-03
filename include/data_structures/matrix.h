@@ -20,6 +20,7 @@ template <typename T>
 class Matrix
 {
   public:
+    // Constructors
     Matrix(const std::size_t n_rows, const std::size_t n_cols);
     Matrix(const std::vector<std::vector<T>> matrix);
     Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t n_cols);
@@ -246,6 +247,8 @@ void Matrix<T>::m_UnpackFlatMatrix(std::vector<T> flat_matrix)
     }
 }
 
+/// @brief Propagate the matrix on the right, copying it keeping the column order (|ABC|ABC|...|)
+/// @param times How many times copy the matrix
 template <typename T>
 void Matrix<T>::PropagateHorizontally(const std::size_t times)
 {
@@ -255,21 +258,6 @@ void Matrix<T>::PropagateHorizontally(const std::size_t times)
         for(std::size_t j = 0U; j < cols; ++j)
         {
             InsertColumn(NCols(), Column(j));
-            m_UpdateSize();
-        }
-    }
-}
-
-template <typename T>
-void Matrix<T>::PropagateVertically(const std::size_t times)
-{
-    // TODO: Check
-    const std::size_t rows = NRows();
-    for(std::size_t i = 0U; i < times; ++i)
-    {
-        for(std::size_t j = 0U; j < rows; ++j)
-        {
-            InsertRow(NRows(), Row(j));
             m_UpdateSize();
         }
     }

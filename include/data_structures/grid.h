@@ -5,10 +5,16 @@
 #define DATA_STRUCTURES_GRID_H
 
 #include <algorithm>
+#include <optional>
 #include <unordered_map>
 
+#ifdef TEST_BUILD
+#include <data_structures/matrix.h>
+#include <primitives/actor.h>
+#else
 #include <commonlib/include/data_structures/matrix.h>
 #include <commonlib/include/primitives/actor.h>
+#endif
 
 namespace commonlib
 {
@@ -28,16 +34,20 @@ typedef std::unordered_map<TileType, char> TilesMap;
 class Grid : public Matrix<char>
 {
   public:
+    // Constructors
     using Matrix::Matrix;
 
+    // Grid-specific setters
     bool AddActor(Actor actor);
-    bool AddTileType(TileType tiletype, char character);
+    bool AddTileTypeDefinition(TileType tiletype, char character);
     bool ActorExists(const std::size_t actor_id);
-    const ActorsMap GetActors() { return m_actors; }
+    inline void MakeInfinite(const bool infinite) { m_infinite = infinite; }
+
+    // Grid-specific getters
+    inline const ActorsMap GetActors() { return m_actors; }
+    bool GetActor(const std::size_t actor_id);
     bool GetActor(const std::size_t actor_id, Actor& actor);
     const TileType GetTileType(std::size_t row, std::size_t col);
-    inline void MakeInfinite(const bool infinite) { m_infinite = infinite; }
-    void Print(char row_sep = '\n', char col_sep = ' ');
 
     // Operators
     char operator()(std::size_t row, std::size_t col);
@@ -49,15 +59,19 @@ class Grid : public Matrix<char>
     bool m_infinite;
 };
 
-bool Grid::ActorExists(const std::size_t actor_id)
+/// @brief Check if a specific actor exists
+/// @param actor_id Id of the actor
+bool Grid::GetActor(const std::size_t actor_id)
 {
     ActorsMap::const_iterator got = m_actors.find(actor_id);
     return (got == m_actors.end()) ? (false) : (true);
 }
 
+/// @brief Return a specific actor
+/// @param actor_id Id of the actor
+/// @param actor Variable to fill with the desired actor
 bool Grid::GetActor(const std::size_t actor_id, Actor& actor)
 {
-    // TODO: Refactor to reuse ActorExists() and avoid duplication
     ActorsMap::iterator got = m_actors.find(actor_id);
     if (got == m_actors.end())
     {
@@ -70,6 +84,7 @@ bool Grid::GetActor(const std::size_t actor_id, Actor& actor)
     }
 }
 
+/// @brief Get the tile type at the specific position
 const TileType Grid::GetTileType(std::size_t row, std::size_t col)
 {
     auto tile_char = this->operator()(row, col);
@@ -81,10 +96,12 @@ const TileType Grid::GetTileType(std::size_t row, std::size_t col)
     return TileType::kTileType_Undefined;
 }
 
+/// @brief Add an actor to the grid
+/// @param actor Actor to add
 bool Grid::AddActor(Actor actor)
 {
     const std::size_t id = actor.Id();
-    if (!ActorExists(id))
+    if (!GetActor(id))
     {
         m_actors.insert(std::make_pair(id, actor));
         return true;
@@ -92,7 +109,10 @@ bool Grid::AddActor(Actor actor)
     return false;
 }
 
-bool Grid::AddTileType(TileType tiletype, char character)
+/// @brief Add a tile definition (linking a tile type to a character)
+/// @param tiletype Tile type to define (type: TileType)
+/// @param character Character to link
+bool Grid::AddTileTypeDefinition(TileType tiletype, char character)
 {
     if (tiletype != TileType::kTileType_Undefined)
     {
@@ -110,19 +130,7 @@ bool Grid::AddTileType(TileType tiletype, char character)
     return false;
 }
 
-void Grid::Print(char row_sep, char col_sep)
-{
-    for (std::size_t i{0}; i < m_rows; ++i)
-    {
-        for (std::size_t j = 0; j < m_cols; ++j)
-        {
-            std::cout << m_data[i][j] << col_sep;
-        }
-        std::cout << row_sep;
-    }
-    std::cout << std::endl;
-}
-
+/// @brief Redefinition of operator() to take into account infinite grids
 char Grid::operator()(std::size_t row, std::size_t col)
 {
     if (row >= m_rows || col >= m_cols)
@@ -139,6 +147,7 @@ char Grid::operator()(std::size_t row, std::size_t col)
     return m_data[row][col];
 }
 
+/// @brief Redefinition of operator() to take into account infinite grids
 char const Grid::operator()(std::size_t row, std::size_t col) const
 {
     if (row >= m_rows || col >= m_cols)
