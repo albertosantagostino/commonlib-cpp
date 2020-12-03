@@ -4,18 +4,20 @@
 #ifndef DATA_STRUCTURES_GRID_H
 #define DATA_STRUCTURES_GRID_H
 
+#include <algorithm>
 #include <unordered_map>
 
-#include <data_structures/matrix.h>
-#include <primitives/actor.h>
+#include <commonlib/include/data_structures/matrix.h>
+#include <commonlib/include/primitives/actor.h>
 
 namespace commonlib
 {
 enum class TileType
 {
-    kEmpty,
-    kWall,
-    kUndefined
+    kTileType_Empty,
+    kTileType_Wall,
+    kTileType_Tree,
+    kTileType_Undefined
 };
 
 typedef std::unordered_map<std::size_t, Actor> ActorsMap;
@@ -34,12 +36,17 @@ class Grid : public Matrix<char>
     const ActorsMap GetActors() { return m_actors; }
     bool GetActor(const std::size_t actor_id, Actor& actor);
     const TileType GetTileType(std::size_t row, std::size_t col);
-
+    inline void MakeInfinite(const bool infinite) { m_infinite = infinite; }
     void Print(char row_sep = '\n', char col_sep = ' ');
+
+    // Operators
+    char operator()(std::size_t row, std::size_t col);
+    char const operator()(std::size_t row, std::size_t col) const;
 
   private:
     ActorsMap m_actors;
     TilesMap m_tiles;
+    bool m_infinite;
 };
 
 bool Grid::ActorExists(const std::size_t actor_id)
@@ -71,7 +78,7 @@ const TileType Grid::GetTileType(std::size_t row, std::size_t col)
     {
         return it->first;
     }
-    return TileType::kUndefined;
+    return TileType::kTileType_Undefined;
 }
 
 bool Grid::AddActor(Actor actor)
@@ -87,7 +94,7 @@ bool Grid::AddActor(Actor actor)
 
 bool Grid::AddTileType(TileType tiletype, char character)
 {
-    if (tiletype != TileType::kUndefined)
+    if (tiletype != TileType::kTileType_Undefined)
     {
         std::vector<char> vals;
         for (auto kv : m_tiles)
@@ -114,6 +121,38 @@ void Grid::Print(char row_sep, char col_sep)
         std::cout << row_sep;
     }
     std::cout << std::endl;
+}
+
+char Grid::operator()(std::size_t row, std::size_t col)
+{
+    if (row >= m_rows || col >= m_cols)
+    {
+        if (m_infinite)
+        {
+            return m_data[row % m_rows][col % m_cols];
+        }
+        else
+        {
+            throw std::out_of_range("Matrix<T>::operator(): Index is out of range");
+        }
+    }
+    return m_data[row][col];
+}
+
+char const Grid::operator()(std::size_t row, std::size_t col) const
+{
+    if (row >= m_rows || col >= m_cols)
+    {
+        if (m_infinite)
+        {
+            return m_data[row % m_rows][col % m_cols];
+        }
+        else
+        {
+            throw std::out_of_range("Matrix<T>::operator(): Index is out of range");
+        }
+    }
+    return m_data[row][col];
 }
 
 }  // namespace commonlib

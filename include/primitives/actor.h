@@ -4,6 +4,8 @@
 #ifndef PRIMITIVES_ACTOR_H
 #define PRIMITIVES_ACTOR_H
 
+#include <commonlib/include/primitives/position.h>
+
 namespace commonlib
 {
 /// @class Actor
@@ -25,8 +27,7 @@ class Actor
   private:
     char m_character;
     std::size_t m_id;
-    std::size_t m_x;
-    std::size_t m_y;
+    // TODO: Add Position
 };
 
 Actor::Actor()

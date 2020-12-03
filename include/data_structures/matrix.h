@@ -23,7 +23,7 @@ class Matrix
     Matrix(const std::size_t n_rows, const std::size_t n_cols);
     Matrix(const std::vector<std::vector<T>> matrix);
     Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t n_cols);
-    Matrix(std::ifstream& fp);
+    Matrix(std::ifstream& fp, const char row_sep = ',');
 
     // Setters / Inserters
     void InsertRow(const std::size_t index, const std::vector<T> new_row = {});
@@ -48,6 +48,10 @@ class Matrix
     void Print(char row_sep = '\n', char col_sep = ' ');
     inline bool IsSquare() { return (NRows() == NCols()); }
     bool IsNumeric();  // TODO
+
+    // Advanced operations
+    void PropagateHorizontally(const std::size_t times);
+    void PropagateVertically(const std::size_t times);
 
     // Operators
     T& operator()(std::size_t row, std::size_t col);
@@ -136,8 +140,9 @@ Matrix<T>::Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t
 
 /// @brief Constructor: initialize the matrix using the provided file
 /// @param fp File stream to use as input for the matrix
+/// @param row_sep The separator used in the file between element (use '\0' if there is no separator)
 template <typename T>
-Matrix<T>::Matrix(std::ifstream& fp)
+Matrix<T>::Matrix(std::ifstream& fp, const char row_sep)
 {
     if (!fp.is_open())
     {
@@ -150,13 +155,24 @@ Matrix<T>::Matrix(std::ifstream& fp)
         std::vector<T> row;
         std::istringstream streamline(line);
         std::string tok;
-        while (getline(streamline, tok, ','))
+        if (row_sep != '\0')
         {
-            auto value = T{};
-            std::from_chars(tok.data(), tok.data() + tok.size(), value);
-            row.push_back(value);
+            while (getline(streamline, tok, row_sep))
+            {
+                auto value = T{};
+                std::from_chars(tok.data(), tok.data() + tok.size(), value);
+                row.push_back(value);
+            }
+            m_data.push_back(row);
         }
-        m_data.push_back(row);
+        else
+        {
+            while (getline(streamline, tok))
+            {
+                std::copy(tok.begin(), tok.end(), std::back_inserter(row));
+                m_data.push_back(row);
+            }
+        }
     }
     m_UpdateSize();
 }
@@ -227,6 +243,35 @@ void Matrix<T>::m_UnpackFlatMatrix(std::vector<T> flat_matrix)
             row.push_back(flat_matrix[index++]);
         }
         m_data.push_back(row);
+    }
+}
+
+template <typename T>
+void Matrix<T>::PropagateHorizontally(const std::size_t times)
+{
+    const std::size_t cols = NCols();
+    for(std::size_t i = 0U; i < times; ++i)
+    {
+        for(std::size_t j = 0U; j < cols; ++j)
+        {
+            InsertColumn(NCols(), Column(j));
+            m_UpdateSize();
+        }
+    }
+}
+
+template <typename T>
+void Matrix<T>::PropagateVertically(const std::size_t times)
+{
+    // TODO: Check
+    const std::size_t rows = NRows();
+    for(std::size_t i = 0U; i < times; ++i)
+    {
+        for(std::size_t j = 0U; j < rows; ++j)
+        {
+            InsertRow(NRows(), Row(j));
+            m_UpdateSize();
+        }
     }
 }
 
