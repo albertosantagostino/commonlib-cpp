@@ -16,7 +16,7 @@ Header-only library to collect personal implementations of algorithms, data stru
 | File                                                     | Class   | Base/Derived | Description                            |
 | -------------------------------------------------------- | ------- | ------------ | -------------------------------------- |
 | [include/primitives/actor.h](include/primitives/actor.h) | `Actor` | B            | Generic actor to be placed on a `Grid` |
-| [include/primitives/position.h](include/primitives/actor.h) | `Position` | B            | Generic 2D position |
+| [include/primitives/position.h](include/primitives/position.h) | `Position` | B            | Generic 2D position |
 
 ### Unit testing and debugging
 
