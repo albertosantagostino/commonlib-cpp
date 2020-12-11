@@ -22,6 +22,7 @@ class Matrix
   public:
     // Constructors
     Matrix(const std::size_t n_rows, const std::size_t n_cols);
+    Matrix(const std::size_t n_rows, const std::size_t n_cols, const T init_value);
     Matrix(const std::vector<std::vector<T>> matrix);
     Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t n_cols);
     Matrix(std::ifstream& fp, const char row_sep = ',');
@@ -46,17 +47,20 @@ class Matrix
     inline std::size_t NCols() const { return m_data[0].size(); }
 
     // Utils / Properties
-    void Print(char row_sep = '\n', char col_sep = ' ');
+    void Print(char col_sep = ' ', char row_sep = '\n');
     inline bool IsSquare() { return (NRows() == NCols()); }
     bool IsNumeric();  // TODO
 
     // Advanced operations
     void PropagateHorizontally(const std::size_t times);
-    void PropagateVertically(const std::size_t times);
+    Matrix CutWindow(const std::size_t row,
+                     const std::size_t col,
+                     const std::size_t window_width,
+                     const T fill_value = {});
 
     // Operators
-    T& operator()(std::size_t row, std::size_t col);
-    T const& operator()(std::size_t row, std::size_t col) const;
+    T& operator()(const std::size_t row, const std::size_t col);
+    T const& operator()(const std::size_t row, const std::size_t col) const;
     inline bool operator==(T const& other) { return m_data == other.m_data; }
     inline bool operator!=(T const& other) { return m_data != other.m_data; }
 
@@ -80,9 +84,29 @@ template <typename T>
 Matrix<T>::Matrix(const std::size_t n_rows, const std::size_t n_cols) : m_data(n_rows), m_rows(n_rows), m_cols(n_cols)
 {
     if ((m_rows == 0) || (m_cols == 0))
-        throw std::length_error("Matrix<T>::Matrix(std::size_t n_rows, std::size_t n_cols): Dimensions cannot be 0");
+        throw std::length_error("Matrix<T>::Matrix(n_rows, n_cols): Dimensions cannot be 0");
     for (std::size_t i{0}; i < m_rows; ++i)
         m_data[i].resize(m_cols);
+}
+
+/// @brief Constructor: initialize a matrix with the provided value of T
+/// @param n_rows Number of rows
+/// @param n_cols Number of columns
+template <typename T>
+Matrix<T>::Matrix(const std::size_t n_rows, const std::size_t n_cols, const T init_value)
+    : m_data(n_rows), m_rows(n_rows), m_cols(n_cols)
+{
+    if ((m_rows == 0) || (m_cols == 0))
+        throw std::length_error("Matrix<T>::Matrix(n_rows, n_cols): Dimensions cannot be 0");
+    for (std::size_t i{0}; i < m_rows; ++i)
+        m_data[i].resize(m_cols);
+    for (auto& row : m_data)
+    {
+        for (auto& entry : row)
+        {
+            entry = init_value;
+        }
+    }
 }
 
 /// @brief Constructor: initialize a matrix with the default value of T
@@ -97,8 +121,7 @@ Matrix<T>::Matrix(const std::vector<std::vector<T>> matrix) : m_data(matrix)
         if (row_length != m_data[i].size())
         {
             throw std::length_error(
-                "Matrix<T>::Matrix(std::vector<std::vector<T>> matrix): Size not coherent, all vectors must have the "
-                "same length");
+                "Matrix<T>::Matrix(matrix): Size not coherent, all vectors must have the same length");
         }
     }
     m_UpdateSize();
@@ -115,8 +138,7 @@ Matrix<T>::Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t
 {
     if (!fp.is_open())
     {
-        throw std::ios_base::failure(
-            "Matrix<T>::Matrix(std::ifstream& fp, std::size_t n_rows, std::size_t n_cols): File not found");
+        throw std::ios_base::failure("Matrix<T>::Matrix(fp, n_rows, n_cols): File not found");
     }
 
     std::string line;
@@ -133,8 +155,7 @@ Matrix<T>::Matrix(std::ifstream& fp, const std::size_t n_rows, const std::size_t
     }
     if (flat_matrix.size() != m_rows * m_cols)
         throw std::length_error(
-            "Matrix<T>::Matrix(std::ifstream& fp, std::size_t n_rows, std::size_t n_cols): Flat_matrix length "
-            "is not equal to n_rows*n_cols");
+            "Matrix<T>::Matrix(fp, n_rows, n_cols): Flat_matrix length is not equal to n_rows*n_cols");
 
     m_UnpackFlatMatrix(flat_matrix);
 }
@@ -147,7 +168,7 @@ Matrix<T>::Matrix(std::ifstream& fp, const char row_sep)
 {
     if (!fp.is_open())
     {
-        throw std::ios_base::failure("Matrix<T>::Matrix(std::ifstream& fp): File not found");
+        throw std::ios_base::failure("Matrix<T>::Matrix(fp): File not found");
     }
 
     std::string line;
@@ -182,8 +203,9 @@ Matrix<T>::Matrix(std::ifstream& fp, const char row_sep)
 /// @param row_sep Separator between rows (default is '\n')
 /// @param col_sep Separator between columns (default is ' ')
 template <typename T>
-void Matrix<T>::Print(char row_sep, char col_sep)
+void Matrix<T>::Print(char col_sep, char row_sep)
 {
+    // TODO: Make correct choice of col separator depending on type of data ('\t' for numbers, ' ' for chars...)
     for (std::size_t i{0}; i < m_rows; ++i)
     {
         for (std::size_t j = 0; j < m_cols; ++j)
@@ -195,6 +217,53 @@ void Matrix<T>::Print(char row_sep, char col_sep)
     std::cout << std::endl;
 }
 
+/// @brief Get a submatrix "cutted" around a desired value, given the width of the window
+/// @param window_width Width of the window, must be an odd number
+/// @param fill_value Value to fill the "empty" space when the window is out of bounds. Uses type default as default
+template <typename T>
+Matrix<T> Matrix<T>::CutWindow(const std::size_t row,
+                               const std::size_t col,
+                               const std::size_t window_width,
+                               const T fill_value)
+{
+    Matrix<T> submatrix(window_width, window_width, fill_value);
+    if ((window_width > 1U) && (window_width <= std::min(NRows(), NCols())))
+    {
+        if (window_width % 2 == 0)
+        {
+            throw std::out_of_range(
+                "Matrix<T>::CutWindow(row, col, window_width): window_width cannot be an even number");
+        }
+        else
+        {
+            const int expansion_width{(int(window_width) - 1) / 2};
+            std::size_t jj{0U};
+            for (int i{int(row) - expansion_width}; i <= (int(row) + expansion_width); ++i)
+            {
+                std::size_t ii{0U};
+                for (int j{int(col) - expansion_width}; j <= (int(col) + expansion_width); ++j)
+                {
+                    if ((i >= 0) && (j >= 0) && (i < NRows()) && (j < NCols()))
+                    {
+                        submatrix(jj, ii) = this->operator()(i, j);
+                    }
+                    ii++;
+                }
+                jj++;
+            }
+        }
+    }
+    else if (window_width == 1U)
+    {
+        return Matrix(1U, 1U, this->operator()(row, col));
+    }
+    else
+    {
+        throw std::out_of_range("Matrix<T>::CutWindow(row, col, window_width): window_width cannot be zero");
+    }
+    return submatrix;
+}
+
 /// @brief Insert a new row at the specified index
 /// @param index Index of the row after which insert the new row
 /// @param new_row New row
@@ -203,8 +272,7 @@ void Matrix<T>::InsertRow(const std::size_t index, const std::vector<T> new_row)
 {
     if ((index > m_rows) || (new_row.size() != m_cols))
     {
-        throw std::length_error(
-            "Matrix<T>::InsertRow(std::size_t index, std::vector<T> new_row): Check index value and new_row length");
+        throw std::length_error("Matrix<T>::InsertRow(index, new_row): Check index value and new_row length");
     }
     auto it = m_data.begin();
     m_data.insert(it + index, new_row);
@@ -219,9 +287,7 @@ void Matrix<T>::InsertColumn(const std::size_t index, const std::vector<T> new_c
 {
     if ((index > m_cols) || (new_column.size() != m_rows))
     {
-        throw std::length_error(
-            "Matrix<T>::InsertColumn(std::size_t index, std::vector<T> new_column): Check index value and new_column "
-            "length");
+        throw std::length_error("Matrix<T>::InsertColumn(index, new_column): Check index value and new_column length");
     }
     std::size_t i{0};
     std::for_each(m_data.begin(), m_data.end(), [index, new_column, &i](std::vector<T>& v) {
@@ -253,9 +319,9 @@ template <typename T>
 void Matrix<T>::PropagateHorizontally(const std::size_t times)
 {
     const std::size_t cols = NCols();
-    for(std::size_t i = 0U; i < times; ++i)
+    for (std::size_t i = 0U; i < times; ++i)
     {
-        for(std::size_t j = 0U; j < cols; ++j)
+        for (std::size_t j = 0U; j < cols; ++j)
         {
             InsertColumn(NCols(), Column(j));
             m_UpdateSize();
@@ -264,14 +330,14 @@ void Matrix<T>::PropagateHorizontally(const std::size_t times)
 }
 
 template <typename T>
-T& Matrix<T>::operator()(std::size_t row, std::size_t col)
+T& Matrix<T>::operator()(const std::size_t row, const std::size_t col)
 {
     if (row >= m_rows || col >= m_cols) throw std::out_of_range("Matrix<T>::operator(): Index is out of range");
     return m_data[row][col];
 }
 
 template <typename T>
-T const& Matrix<T>::operator()(std::size_t row, std::size_t col) const
+T const& Matrix<T>::operator()(const std::size_t row, const std::size_t col) const
 {
     if (row >= m_rows || col >= m_cols) throw std::out_of_range("Matrix<T>::operator(): Index is out of range");
     return m_data[row][col];
