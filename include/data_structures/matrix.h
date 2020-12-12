@@ -275,7 +275,7 @@ const std::size_t Matrix<T>::CountElements(const T searched_element)
     {
         for (std::size_t col{0U}; col < m_cols; ++col)
         {
-            if(this->operator()(row,col) == searched_element)
+            if (this->operator()(row, col) == searched_element)
             {
                 matches++;
             }
