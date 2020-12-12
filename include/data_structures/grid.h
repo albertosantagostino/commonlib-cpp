@@ -50,8 +50,8 @@ class Grid : public Matrix<char>
     const TileType GetTileType(std::size_t row, std::size_t col);
 
     // Operators
-    char operator()(std::size_t row, std::size_t col);
-    char const operator()(std::size_t row, std::size_t col) const;
+    char& operator()(std::size_t row, std::size_t col);
+    char const& operator()(std::size_t row, std::size_t col) const;
 
   private:
     ActorsMap m_actors;
@@ -131,7 +131,7 @@ bool Grid::AddTileTypeDefinition(TileType tiletype, char character)
 }
 
 /// @brief Redefinition of operator() to take into account infinite grids
-char Grid::operator()(std::size_t row, std::size_t col)
+char& Grid::operator()(std::size_t row, std::size_t col)
 {
     if (row >= m_rows || col >= m_cols)
     {
@@ -148,7 +148,7 @@ char Grid::operator()(std::size_t row, std::size_t col)
 }
 
 /// @brief Redefinition of operator() to take into account infinite grids
-char const Grid::operator()(std::size_t row, std::size_t col) const
+char const& Grid::operator()(std::size_t row, std::size_t col) const
 {
     if (row >= m_rows || col >= m_cols)
     {

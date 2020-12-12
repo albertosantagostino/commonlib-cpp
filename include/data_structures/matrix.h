@@ -57,6 +57,7 @@ class Matrix
                      const std::size_t col,
                      const std::size_t window_width,
                      const T fill_value = {});
+    const std::size_t CountElements(const T searched_element);
 
     // Operators
     T& operator()(const std::size_t row, const std::size_t col);
@@ -264,6 +265,25 @@ Matrix<T> Matrix<T>::CutWindow(const std::size_t row,
     return submatrix;
 }
 
+/// @brief Count and return the number of occurrences of the specified element
+/// @param searched_element Element to count
+template <typename T>
+const std::size_t Matrix<T>::CountElements(const T searched_element)
+{
+    std::size_t matches{0U};
+    for (std::size_t row{0U}; row < m_rows; ++row)
+    {
+        for (std::size_t col{0U}; col < m_cols; ++col)
+        {
+            if(this->operator()(row,col) == searched_element)
+            {
+                matches++;
+            }
+        }
+    }
+    return matches;
+}
+
 /// @brief Insert a new row at the specified index
 /// @param index Index of the row after which insert the new row
 /// @param new_row New row
@@ -289,7 +309,7 @@ void Matrix<T>::InsertColumn(const std::size_t index, const std::vector<T> new_c
     {
         throw std::length_error("Matrix<T>::InsertColumn(index, new_column): Check index value and new_column length");
     }
-    std::size_t i{0};
+    std::size_t i{0U};
     std::for_each(m_data.begin(), m_data.end(), [index, new_column, &i](std::vector<T>& v) {
         v.insert(v.begin() + index, new_column[i++]);
     });
@@ -301,11 +321,11 @@ void Matrix<T>::InsertColumn(const std::size_t index, const std::vector<T> new_c
 template <typename T>
 void Matrix<T>::m_UnpackFlatMatrix(std::vector<T> flat_matrix)
 {
-    std::size_t index = 0;
-    for (std::size_t i{0}; i < m_rows; ++i)
+    std::size_t index = 0U;
+    for (std::size_t i{0U}; i < m_rows; ++i)
     {
         std::vector<T> row;
-        for (std::size_t j = 0; j < m_cols; ++j)
+        for (std::size_t j{0U}; j < m_cols; ++j)
         {
             row.push_back(flat_matrix[index++]);
         }
